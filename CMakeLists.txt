@@ -286,7 +286,7 @@ set (BINDINGS_DIR ${LIB_INSTALL_DIR}/proton/bindings)
 
 set (SYSINSTALL_BINDINGS OFF CACHE BOOL "If SYSINSTALL_BINDINGS is OFF then proton bindings will be installed underneath ${BINDINGS_DIR} and each user will need to modify their interpreter configuration to load the appropriate binding. If SYSINSTALL_BINDINGS is ON, then each language interpreter will be queried for the appropriate directory and proton bindings will be installed and available system wide with no additional per user configuration.")
 
-set (BINDING_LANGS PYTHON RUBY)
+set (BINDING_LANGS PYTHON RUBY PHP)
 
 foreach (LANG ${BINDING_LANGS})
   set (SYSINSTALL_${LANG} OFF CACHE BOOL "Install ${LANG} bindings into interpreter specified location.")
@@ -389,7 +389,7 @@ endif (GO_EXE)
 
 if(SWIG_FOUND)
   # Add any new swig bindings here - the directory name must be the same as the binding name
-  list(APPEND BINDINGS python ruby)
+  list(APPEND BINDINGS python ruby php)
 
   include(UseSWIG)
 
@@ -414,6 +414,19 @@ if(SWIG_FOUND)
   if (RUBY_FOUND)
     set (DEFAULT_RUBY ON)
   endif (RUBY_FOUND)
+
+  # Prerequites for PHP:
+  # For now, assume PHP support if the 'php-config' tool is present.
+  # @todo: allow user to specify which php-config if multiple PHP sources installed!
+  find_program(PHP_CONFIG_EXE php-config)
+  if (PHP_CONFIG_EXE)
+    find_program(PHP_EXE php)
+    mark_as_advanced (PHP_EXE)
+    if (PHP_EXE)
+      set (DEFAULT_PHP ON)
+    endif (PHP_EXE)
+  endif (PHP_CONFIG_EXE)
+  mark_as_advanced (PHP_CONFIG_EXE)
 endif()
 
 # To kick-start a build with just a few bindings enabled by default, e.g. ruby and go:
