@@ -417,7 +417,6 @@ if(SWIG_FOUND)
 
   # Prerequites for PHP:
   # For now, assume PHP support if the 'php-config' tool is present.
-  # @todo: allow user to specify which php-config if multiple PHP sources installed!
   find_program(PHP_CONFIG_EXE php-config)
   if (PHP_CONFIG_EXE)
     find_program(PHP_EXE php)

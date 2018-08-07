@@ -51,5 +51,3 @@ if ($php_dir) {
 }
 
 print "\n";
-
-?>

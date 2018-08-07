@@ -60,5 +60,3 @@ round_trip(true);
 round_trip(1234);
 round_trip(3.14159);
 round_trip(array("pi" => 3.14159, "blueberry-pi" => "yummy"));
-
-?>

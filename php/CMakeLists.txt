@@ -29,16 +29,18 @@ execute_process(COMMAND ${PHP_CONFIG_EXE} --includes
                 ERROR_VARIABLE  errmsg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+include_directories(${PN_C_INCLUDE_DIR} ${PHP_INCLUDES})
+
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/php.i PROPERTIES SWIG_FLAGS "-I${PROJECT_SOURCE_DIR}/include")
-list(APPEND SWIG_MODULE_cproton_EXTRA_DEPS
-    ${CMAKE_SOURCE_DIR}/proton-c/include/proton/cproton.i
+list(APPEND SWIG_MODULE_cproton-php_EXTRA_DEPS
+    ${CMAKE_SOURCE_DIR}/c/include/proton/cproton.i
     ${PROTON_HEADERS}
-)
-swig_add_library(cproton LANGUAGE php SOURCES php.i)
+    )
+swig_add_library(cproton-php LANGUAGE php7 SOURCES php.i)
 set_source_files_properties(${swig_generated_file_fullname} PROPERTIES COMPILE_FLAGS "${PHP_INCLUDES}")
-swig_link_libraries(cproton ${BINDING_DEPS})
+swig_link_libraries(cproton-php ${BINDING_DEPS})
 # PHP modules must be linked with unresolved symbols as they are presumably satisfied only when loaded by php itself
-set_target_properties(cproton
+set_target_properties(cproton-php
     PROPERTIES
     PREFIX ""
     LINK_FLAGS "${ALLOW_UNDEFINED}")
@@ -100,7 +102,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/proton.ini.in
                 ${CMAKE_CURRENT_BINARY_DIR}/proton.ini
                 @ONLY)
 
-install(TARGETS cproton
+install(TARGETS cproton-php
         DESTINATION ${PHP_EXT_DIR}
         COMPONENT PHP)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cproton.php

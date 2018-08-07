@@ -28,95 +28,20 @@
 
 %header %{
 /* Include the headers needed by the code in this wrapper file */
-#include <proton/types.h>
-#include <proton/connection.h>
-#include <proton/condition.h>
-#include <proton/delivery.h>
-#include <proton/event.h>
+#include <proton/engine.h>
 #include <proton/message.h>
 #include <proton/messenger.h>
-#include <proton/session.h>
 #include <proton/url.h>
 #include <proton/reactor.h>
-#include <proton/handlers.h>
 #include <proton/sasl.h>
+#include <proton/ssl.h>
+#include <proton/handlers.h>
+#include <proton/types.h>
 
 #define zend_error_noreturn zend_error
 %}
 
 %apply (char *STRING, int LENGTH) { (char *STRING, size_t LENGTH) };
-
-// ssize_t return value
-//
-%typemap(out) ssize_t {
-    ZVAL_LONG($result, (long)$1);
-}
-
-// (char **OUTPUT_BUFFER, ssize_t *OUTPUT_LEN)
-//
-// typemap for binary buffer output arguments.  Given an uninitialized pointer for a
-// buffer (OUTPUT_BUFFER) and a pointer to an un-initialized size/error (OUTPUT_LEN), a buffer
-// will be allocated and filled with binary data. *OUTPUT_BUFFER will be set to the address
-// of the allocated buffer.  *OUTPUT_LEN will be set to the size of the data.  The maximum
-// length of the buffer must be provided by a separate argument.
-//
-// The return value is an array, with [0] set to the length of the output buffer OR an
-// error code and [1] set to the returned string object.  This value is appended to the
-// function's return value (also an array).
-//
-%typemap(in,numinputs=0) (char **OUTPUT_BUFFER, ssize_t *OUTPUT_LEN) (char *Buff = 0, ssize_t outLen = 0) {
-    // setup locals for output.
-    $1 = &Buff;
-    $2 = &outLen;
-}
-%typemap(argout,fragment="t_output_helper") (char **OUTPUT_BUFFER, ssize_t *OUTPUT_LEN) {
-    // convert to array: [0]=len||error, [1]=binary string
-    zval *tmp;
-    ALLOC_INIT_ZVAL(tmp);
-    array_init(tmp);
-    ssize_t len = *($2);
-    add_next_index_long(tmp, len); // write the len|error code
-    if (len >= 0) {
-        add_next_index_stringl(tmp, *($1), len, 0);  // 0 == take ownership of $1 memory
-    } else {
-        add_next_index_string(tmp, "", 1);    // 1 = strdup the ""
-    }
-    t_output_helper(&$result, tmp);     // append it to output array
-}
-
-%typemap(in) pn_bytes_t {
-  if (ZVAL_IS_NULL(*$input)) {
-    $1.start = NULL;
-    $1.size = 0;
-  } else {
-    $1.start = Z_STRVAL_PP($input);
-    $1.size = Z_STRLEN_PP($input);
-  }
-}
-
-%typemap(out) pn_bytes_t {
-  ZVAL_STRINGL($result, $1.start, $1.size, 1);
-}
-
-%typemap(in) pn_uuid_t {
-  memmove($1.bytes, Z_STRVAL_PP($input), 16);
-}
-
-%typemap(out) pn_uuid_t {
-  ZVAL_STRINGL($result, $1.bytes, 16, 1);
-}
-
-%typemap(in) pn_decimal128_t {
-  memmove($1.bytes, Z_STRVAL_PP($input), 16);
-}
-
-%typemap(out) pn_decimal128_t {
-  ZVAL_STRINGL($result, $1.bytes, 16, 1);
-}
-
-// The PHP SWIG typedefs define the typemap STRING, LENGTH to be binary safe (allow
-// embedded \0's).
-//
 
 // allow pn_link_send/pn_input's input buffer to be binary safe
 ssize_t pn_link_send(pn_link_t *transport, char *STRING, size_t LENGTH);
@@ -190,7 +115,7 @@ ssize_t pn_transport_input(pn_transport_t *transport, char *STRING, size_t LENGT
 }
 %typemap(argout) (const char **RETURN_STRING, size_t *RETURN_LEN) {
     // This allocates a copy of the binary buffer for return to the caller
-    ZVAL_STRINGL($result, *($1), *($2), 1); // 1 = duplicate the input buffer
+    ZVAL_STRINGL($result, *($1), *($2));
 }
 
 // Suppress "Warning(451): Setting a const char * variable may leak memory." on pn_delivery_tag_t

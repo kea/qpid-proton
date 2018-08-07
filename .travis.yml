@@ -23,7 +23,6 @@ compiler:
 - gcc
 - clang
 
-
 matrix:
   include:
   - os: linux
@@ -63,7 +62,7 @@ addons:
     - libssl-dev
     - libsasl2-dev
     - sasl2-bin
-    - swig
+    - swig3.0
     - python-dev
     - valgrind
     - ruby
@@ -71,6 +70,9 @@ addons:
     - python3-dev
     - golang
     - lcov
+
+before_install:
+- phpenv global 7.0
 
 install:
 - python -m pip install --user --upgrade pip
