@@ -57,12 +57,12 @@ matrix:
 # See before_install brew commands below
 addons:
   apt:
+    update: true
     packages:
     - cmake
     - libssl-dev
     - libsasl2-dev
     - sasl2-bin
-    - swig3.0
     - python-dev
     - valgrind
     - ruby
@@ -72,12 +72,14 @@ addons:
     - lcov
 
 before_install:
-- phpenv global 7.0
+  - phpenv global 7.0
+  - git clone https://github.com/swig/swig.git
+  - pushd swig && git checkout rel-3.0.12 && git show 224bb9e0232a -- Source/Modules/php.cxx | git apply && ./autogen.sh && ./configure && make && sudo make install && popd
 
 install:
-- python -m pip install --user --upgrade pip
-- python -m pip install --user coverage tox
-- gem install minitest
+  - python -m pip install --user --upgrade pip
+  - python -m pip install --user coverage tox
+  - gem install minitest
 
 before_script:
 - mkdir build
