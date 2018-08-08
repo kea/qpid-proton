@@ -40,7 +40,7 @@ matrix:
     before_install:
     - brew update
     - brew upgrade cmake python openssl
-    - brew install libuv swig
+    - brew install libuv php70
 
   - os: osx
     osx_image: xcode9
@@ -51,7 +51,7 @@ matrix:
     before_install:
     - brew update
     - brew upgrade cmake python openssl
-    - brew install libuv swig
+    - brew install libuv php70
 
 # Note addons is apt specific at the moment and will not be applied for osx.
 # See before_install brew commands below
