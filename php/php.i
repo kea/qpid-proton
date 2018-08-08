@@ -43,6 +43,12 @@
 
 %apply (char *STRING, int LENGTH) { (char *STRING, size_t LENGTH) };
 
+// ssize_t return value
+//
+%typemap(out) ssize_t {
+    ZVAL_LONG($result, (long)$1);
+}
+
 // allow pn_link_send/pn_input's input buffer to be binary safe
 ssize_t pn_link_send(pn_link_t *transport, char *STRING, size_t LENGTH);
 %ignore pn_link_send;
